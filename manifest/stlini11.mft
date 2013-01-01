@@ -1,0 +1,7 @@
+contrib/libini/copying.lib
+contrib/libini/ini.c
+contrib/libini/ini.h
+contrib/libini/libini.txt
+contrib/libini/Makefile
+manifest/stlini11.mft
+manifest/stlini11.ver

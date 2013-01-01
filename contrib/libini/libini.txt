@@ -1,0 +1,379 @@
+
+  LibINI 1.1
+  ~~~~~~~~~~
+  Copyright 1999 STEALTH Technologies
+  [stealth.tech@seznam.cz, http://stealthtech.tsx.org]
+
+  Written by Michal "SpaZe" Spacek of the STEALTH Technologies
+
+Index
+-----
+   1. Intro
+   2. INI file structure
+   3. System requirements
+   4. Installation
+   5. Changelog
+   6. Where to find LibINI
+   7. Example
+   8. LibINI publicly available symbols
+   9. License
+  10. Contacting me
+  11. Outro
+
+1. Intro
+--------
+LibINI is a library for work with WinDoze-like INI files. I think it is a
+great thing if one can configure a program when the program is not run.
+This library is DJGPP and Linux compatible and only DJGPP and Linux
+compatible. It uses doubly linked list technology. The file is read to
+memory and all the work is done only in memory. If you want to write the
+file I've made a function for it too. There is also a function for change
+the entries in INI file. If the INI file in memory is unneeded you can
+simply dispose it. The library is able to handle more than one INI file at
+the same time. The files are identified by a pointer to the beginning of
+list.
+
+2. INI file structure
+---------------------
+; section comment
+[Section0]
+profile0=value0
+profile1=value1 #value comment
+; entry comment
+profile2=value2
+# entry comment
+profile3=value3 ;value comment
+
+[Section1]
+profile0=value0
+profile1=value1 ;value comment
+# entry comment
+profile2=value2
+# entry comment
+profile3=value3 ;value comment
+...
+
+There has to be at least one section ([General], [Main], ...).
+
+Profile in one section can have the same name as another profile in another
+section.
+
+Section names passed as arguments to LibINI functions must not have '[' and
+']'. On the other side, comments must have ';' or '#'.
+
+Sections and profiles are case insensitive.
+
+3. System requirements
+----------------------
+- DJGPP compatible system
+    If you don't know what DJGPP is, point your webbrowser to
+    http://www.delorie.com/djgpp/
+- GCC, Fileutils and Binutils to build LibINI
+
+4. Installation
+---------------
+  Unzip stlini11.zip in your DJGPP home dir (c:/djgpp) with
+  pkunzip -d stlini11.zip for example. The library is installed to
+  contrib/libini subdirectory.
+
+  Build the library. Just run 'make' in LibINI directory
+
+  Copy contrib/libini/libini.a to a directory in your LIBRARY_PATH or
+  add contrib/libini to LIBRARY_PATH in your djgpp.env.
+
+  Copy contrib/libini/ini.h to a directory in your C_INCLUDE_PATH or
+  add contrib/libini to ???_INCLUDE_PATH environment variables in your
+  djgpp.env file.
+
+5. Changelog
+------------
+1.0 (Feb 17 1999):
+- First release
+
+1.1 (Apr 2 1999):
+- Removed NULL returning in ini_get_string when section
+    or profile wasn't found
+- Added a trim of '\t' in profile and value to ini_get_string
+- In ini_get_string changed char **ARG_value to char *ARG_value
+- Removed -O3 switch
+- Added C++ support, suggested by
+    "Manni Heumann" <manfred.heumann@post.uni-bielefeld.de> and by
+    John Scott Kjellman <jkjellman@ameritech.net>
+- Changed 'Makefile' for better compatibility with Unix, suggested by
+    Scott Daniels <scott@timone.npt.nuwc.navy.mil>
+- Added support for '#' as a comment character, suggested by
+    Shawn Hargreaves <ShawnH@Probe.co.uk>
+- Changed directory name
+- Removed binary from distribution package
+- Changed distribution package name
+- Fixed typos in 'libini.txt'
+- Added example program to 'libini.txt', suggested by
+    "Manni Heumann" <manfred.heumann@post.uni-bielefeld.de> and by
+    Scott Daniels <scott@timone.npt.nuwc.navy.mil>
+- Fixed bug in ini_load when trying to load empty file and added
+    new return code (INI_FILE_IS_EMPTY)
+- Changed ini_get_xxx to return right code when ini_get_string failed
+- All functions rewritten to return status code, no more global variable,
+    suggested by "Manni Heumann" <manfred.heumann@post.uni-bielefeld.de>
+- Changed INI_RESULT_xxx to INI_xxx
+- Added new return code (INI_MALLOC_FAILED) to ini_get_string
+- Some minor changes in 'libini.txt'
+- Changed NODE to INI_NODE for better compatibility with other toolkits
+- Added ini_new to create new INI list
+- Fixed off-by-one errors (too much to list here :<)
+- Fixed error in ini_get_string causing SIGSEGV. I was changing the pointer
+    to profile to do the trim, but I forgot to set the pointer back,
+    reported by John Scott Kjellman <jkjellman@ameritech.net>
+- Changed atoi and atol to strtol to support hex numbers, suggested by
+    John Scott Kjellman <jkjellman@ameritech.net>
+
+6. Where to find LibINI
+-----------------------
+First place you should look at is http://stealthtech.tsx.org in Products
+section. There should always be the newest version of LibINI. I'll also try
+to upload it to simtelnet to djgpp/v2tk dir. If you want to redistribute
+LibINI on your www/ftp/bbs contact me first (stealth.tech@seznam.cz) (is
+there anyone who wants to do that? :>).
+
+7. Example
+----------
+Suppose we have INI file named 'somefile.ini'. This file looks like this:
+
+[GENERAL]
+quickexit=Yes
+scrsaver=psyxo
+brightness=20
+
+And now here goes a simple program (no error checking, not compilable, but
+I think it is enough):
+
+#include <ini.h>
+main()
+{
+  int i;
+  char str[MAX_LINE];  // MAX_LINE is defined in <ini.h>
+  INI_NODE *ini_file
+
+  /* Program startup, we wanna set up configuration */
+  // load 'somefile.ini' into memory
+  ini_load(&ini_file, "somefile.ini");
+
+  // load truth value from section 'General' and profile 'QuickExit' to 'i'
+  ini_get_truth(ini_file, "General", "QuickExit", &i);
+  // set something in our program
+  if (i == 0)
+    disable_alt_x_without_prompt();
+  else
+    enable_alt_x_without_prompt();
+
+  // load string value from 'General' and 'ScrSaver' to 'str'
+  ini_get_string(ini_file, "General", "ScrSaver", str);
+  // set something
+  use_scrsaver(str);
+
+  // load integer value from 'General' and 'Brightness' to 'i'
+  ini_get_int(ini_file, "General", "Brightness", &i);
+  // set something
+  set_brightness(i);
+
+  /* changes */
+  quick_exit = 0;
+  displ_bright = 127;
+  strcpy(scr_saver_spec, "insomnia");
+  user_id = 0;
+  cpu_type = 3;
+  /* User have changed something and we wanna put it to INI file */
+
+  // section 'General' exists, so no section comment is used
+  // profiles 'QuickExit', 'Brightness', 'ScrSaver' exist, so no entry comment is used
+  ini_put_entry(ini_file, "; general settings for program", "General", "; exit without prompt", "QuickExit", "%s", quick_exit == 0 ? "No" : "Yes");
+  ini_put_entry(ini_file, "; general settings for program", "General", "; display brightness", "Brightness", "%d ; -128 .. 127", disl_bright);
+  ini_put_entry(ini_file, "; general settings for program", "General", "; screen saver", "ScrSaver", "%s ; without extension", scr_saver_spec);
+
+  // add new entry to section 'General'
+  // section 'General' exists - no section comment is used
+  // profile 'UserID' doesn't exist - entry comment is used
+  ini_put_entry(ini_file, "; general settings for program", "General", "; Network User ID", "UserID", "%d ; 0 - root, 1 - james, 2 - bill", user_id);
+
+  // add new section
+  // section 'Target' doesn't exists - section comment is used
+  // profile 'CPU' doesn't exist - entry comment is used
+  ini_put_entry(ini_file, "; target platform", "Target", "; system CPU", "CPU", "%d ; 0 - Intel, 1 - Cyrix, 2 - AMD, 3 - R14000", cpu_type);
+
+  ini_flush(ini_file, "somefile.ini");
+  ini_free(ini_file);
+}
+
+Now the file should look like this:
+
+[GENERAL]
+quickexit=No
+scrsaver=insomnia
+brightness=127
+; Network User ID
+UserID=0 ; 0 - root, 1 - james, 2 - bill
+
+; target platform
+[Target]
+; system CPU
+CPU=3 ; 0 - Intel, 1 - Cyrix, 2 - AMD, 3 - R14000
+
+8. LibINI publicly available symbols
+------------------------------------
+int ini_new(INI_NODE **ARG_start);
+  Creates new INI list. The new list starts at 'ARG_start'.
+  Possible return codes:
+    INI_CALL_SUCCESSFUL - Function call was successful
+    INI_MALLOC_FAILED - Memory allocation (malloc) failed
+
+int ini_load(INI_NODE **ARG_start, const char *ARG_file);
+  Loads INI file 'ARG_file' into list starting at 'ARG_start'.
+  Possible return codes:
+    INI_CALL_SUCCESSFUL - Function call was successful
+    INI_MALLOC_FAILED - Memory allocation (malloc) failed
+    INI_FOPEN_FAILED - File open (fopen) failed
+    INI_FILE_IS_EMPTY - INI file is empty
+
+int ini_flush(INI_NODE *ARG_start, const char *ARG_file);
+  Writes INI list starting at 'ARG_start' to file 'ARG_file'.
+  Possible return codes:
+    INI_CALL_SUCCESSFUL - Function call was successful
+    INI_FOPEN_FAILED - File open (fopen) failed
+    INI_FPRINTF_FAILED - Formatted print to file (fprintf) failed
+
+void ini_free(INI_NODE *ARG_start);
+  Disposes the list starting at 'ARG_start'.
+  Possible return codes:
+    none
+
+int ini_get_string(INI_NODE *ARG_start, const char *ARG_section, const char *ARG_profile, char *ARG_value);
+  Gets string from INI list starting at 'ARG_start', from section
+  'ARG_section' and profile 'ARG_profile' to 'ARG_value'. It trims all
+  spaces and tabs from beginning and from end of the value. It trims ';'
+  and '#' comments too. If you want to preserve spaces and/or tabs use '"'
+  at the beginning and/or at the end of the value (profile = "  spaces and
+  tabs  \t ").
+  Possible return codes:
+    INI_CALL_SUCCESSFUL - Function call was successful
+    INI_MALLOC_FAILED - Memory allocation (malloc) failed
+    INI_SECTION_NOT_FOUND - Section not found
+    INI_PROFILE_NOT_FOUND - Profile not found
+
+int ini_get_int(INI_NODE *ARG_start, const char *ARG_section, const char *ARG_profile, int *ARG_value);
+  Gets integer from INI list starting at 'ARG_start', from section
+  'ARG_section' and profile 'ARG_profile' to 'ARG_value'. It calls
+  'ini_get_string' and then tries to convert the string into integer. If
+  the string isn't int it stores 0 to 'ARG_value'.
+  Warning: 0753 is treated as base 8 number but 753 as base 10!
+  Possible return codes:
+    INI_CALL_SUCCESSFUL - Function call was successful
+    INI_MALLOC_FAILED - Memory allocation (malloc) failed
+    INI_SECTION_NOT_FOUND - Section wasn't found
+    INI_PROFILE_NOT_FOUND - Profile wasn't found
+
+int ini_get_long(INI_NODE *ARG_start, const char *ARG_section, const char *ARG_profile, long *ARG_value);
+  Gets long from INI list starting at 'ARG_start', from section
+  'ARG_section' and profile 'ARG_profile' to 'ARG_value'. It calls
+  'ini_get_string' and the tries to convert the string into long. If the
+  string isn't long it stores 0 to 'ARG_value'.
+  Warning: 0753 is treated as base 8 number but 753 as base 10!
+  Possible return codes:
+    INI_CALL_SUCCESSFUL - Function call was successful
+    INI_MALLOC_FAILED - Memory allocation (malloc) failed
+    INI_SECTION_NOT_FOUND - Section wasn't found
+    INI_PROFILE_NOT_FOUND - Profile wasn't found
+
+int ini_get_double(INI_NODE *ARG_start, const char *ARG_section, const char *ARG_profile, double *ARG_value);
+  Gets double from INI list starting at 'ARG_start', from section
+  'ARG_section' and profile 'ARG_profile' to 'ARG_value'. It calls
+  'ini_get_string' and the tries to convert the string into double. If the
+  string isn't double it stores 0 to 'ARG_value'.
+  Possible return codes:
+    INI_CALL_SUCCESSFUL - Function call was successful
+    INI_MALLOC_FAILED - Memory allocation (malloc) failed
+    INI_SECTION_NOT_FOUND - Section wasn't found
+    INI_PROFILE_NOT_FOUND - Profile wasn't found
+
+int ini_get_truth(INI_NODE *ARG_start, const char *ARG_section, const char *ARG_profile, int *ARG_value)
+  Gets 0 or 1 from INI list starting at 'ARG_start', from section
+  'ARG_section' and profile 'ARG_profile' to 'ARG_value'. If it can't be
+  found it stores NULL to 'ARG_value'. As a true value (1) are treated
+  these words (case insensitive): "1", "YES", "ON" and "TRUE". As a false
+  value (0) are treated these words (case insensitive): "0", "NO", "OFF",
+  "FALSE".
+  Possible return codes:
+    INI_CALL_SUCCESSFUL - Function call was successful
+    INI_MALLOC_FAILED - Memory allocation (malloc) failed
+    INI_SECTION_NOT_FOUND - Section wasn't found
+    INI_PROFILE_NOT_FOUND - Profile wasn't found
+
+int ini_put_entry(INI_NODE *ARG_start, const char *ARG_section_comment, const char *ARG_section, const char *ARG_entry_comment, const char *ARG_profile, const char *ARG_value, ...)
+  Puts 'ARG_value' from profile 'ARG_profile' + 'ARG_entry_comment' of
+  section 'ARG_section' + 'ARG_section_comment' to INI starting at
+  'ARG_start'. If 'ARG_entry_comment' or 'ARG_section_comment' is NULL, no
+  comment is stored. Formatted text (like printf()) can be used in
+  'ARG_value' ("%d ;%s", value, comment). If no section matching to
+  'ARG_section' is found the section 'ARG_section' is created at the end of
+  the list. 'ARG_section_comment' is used. The entry consisting of
+  'ARG_entry comment', 'ARG_profile' and 'ARG_value' is put immediately
+  after the newly created section. If section is found, no 'ARG_section' is
+  created, no 'ARG_section_comment' is used. If 'ARG_profile' is found then
+  comment is stripped out of 'ARG_value' and the value is put into the
+  corresponding profile preserving the original comment, if any. If
+  'ARG_profile' isn't found then new profile called 'ARG_profile' is
+  created at the end of 'ARG_section'. 'ARG_entry_comment' is used.
+  Untouched 'ARG_value' is put into the right 'ARG_profile'.
+  Possible return codes:
+    INI_CALL_SUCCESSFUL - Function call was successful
+    INI_MALLOC_FAILED - Memory allocation (malloc) failed
+
+9. License
+----------
+LibINI is distributed under GNU LGPL (GNU Library General Public License),
+see 'copying.lib' for details.
+
+    This library is free software; you can redistribute it and/or
+    modify it under the terms of the GNU Library General Public
+    License as published by the Free Software Foundation; either
+    version 2 of the License, or (at your option) any later version.
+
+    This library is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Library General Public License for more details.
+
+    You should have received a copy of the GNU Library General Public
+    License along with this library; if not, write to the Free
+    Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+Additional conditions:
+  If you make some/any modifications you should contact me and tell me
+  about what you've made to make it official in next release. You should
+  also send me a copy of modified source. You have to leave the original
+  copyright message untouched and add a comment about your modifications.
+
+  If you want to include LibINI in a commercial product (on a CD-ROM for a
+  book or something else) contact me first.
+
+10. Contacting me
+-----------------
+Bug reports, suggestions, questions, private Bill Gates' e-mail address
+(http://www.microsoft.com/i/hate/you/), jokes, access rights, cool utils,
+logins and passwords to NSA and/or Pentagon computers and other stuffs are
+welcomed!
+
+Snail mail:
+  Michal Spacek
+  Ceske Vrbne 2315
+  Ceske Budejovice, 370 11
+  Czech Republic
+
+E-mail:
+  stealth.tech@seznam.cz
+
+11. Outro
+---------
+Thank you for downloading and using LibINI. Your comments, suggestions,
+bugreports and faith helped a lot. This is the beginning of the end :>
+
+Bye!
