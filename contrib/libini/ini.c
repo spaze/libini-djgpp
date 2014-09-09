@@ -12,7 +12,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
-#include <ini.h>
+#include "ini.h"
+
+#ifdef NOSTRICMP
+#define stricmp( s1, s2 )      strcasecmp( s1, s2 )
+#endif
 
 int ini_new(INI_NODE **ARG_start)
 /*************************************************************************
@@ -105,7 +109,8 @@ int ini_load(INI_NODE **ARG_start, const char *ARG_file)
           temp_node = node;
         }
 
-    if ((node = (INI_NODE *)node->next_node = (struct INI_NODE *)malloc(sizeof(INI_NODE))) == NULL)
+	node->next_node = (struct INI_NODE *)malloc(sizeof(INI_NODE));
+    if ((node = (INI_NODE *)node->next_node ) == NULL)
       return(1);
     node->prev_node = (struct INI_NODE *)temp_node;
   }
@@ -222,9 +227,12 @@ int ini_get_string(INI_NODE *ARG_start, const char *ARG_section, const char *ARG
   do {
     temp_node = node;
     if (node->node_id == 3) {
-      char temp_profile[strlen(temp_node->profile)];
+	  char *temp_profile;
       char *temp_profile_ptr;
 
+	  temp_profile = calloc( strlen(temp_node->profile) + 1, sizeof(char) );
+	  if (temp_profile == NULL) /* alloc failure */
+		  return(1);
       strcpy(temp_profile, temp_node->profile);
       temp_profile_ptr = temp_node->profile;
       while (temp_node->profile[0] == ' ' || temp_node->profile[0] == '\t')
@@ -235,6 +243,7 @@ int ini_get_string(INI_NODE *ARG_start, const char *ARG_section, const char *ARG
         found = 1;
       temp_node->profile = temp_profile_ptr;
       strcpy(temp_node->profile, temp_profile);
+	  free(temp_profile);
     }
   } while ((node = (INI_NODE *)node->next_node) != NULL && temp_node->node_id != 2 && found == 0);
 
@@ -413,7 +422,8 @@ int ini_put_entry(INI_NODE *ARG_start, const char *ARG_section_comment, const ch
   if (found == 0) {
     char *temp_char_ptr;
 
-    if ((node = (INI_NODE *)temp_node->next_node = (struct INI_NODE *)malloc(sizeof(INI_NODE))) == NULL)
+	temp_node->next_node = (struct INI_NODE *)malloc(sizeof(INI_NODE));
+    if ((node = (INI_NODE *)temp_node->next_node ) == NULL)
       return(1);
 
     node->prev_node = (struct INI_NODE *)temp_node;
@@ -440,7 +450,8 @@ int ini_put_entry(INI_NODE *ARG_start, const char *ARG_section_comment, const ch
     temp_node = node;
 
     if (ARG_section_comment != NULL) {
-      if ((node = (INI_NODE *)temp_node->next_node = (struct INI_NODE *)malloc(sizeof(INI_NODE))) == NULL)
+	  temp_node->next_node = (struct INI_NODE *)malloc(sizeof(INI_NODE));
+      if ((node = (INI_NODE *)temp_node->next_node ) == NULL)
         return(1);
 
       node->prev_node = (struct INI_NODE *)temp_node;
@@ -452,7 +463,8 @@ int ini_put_entry(INI_NODE *ARG_start, const char *ARG_section_comment, const ch
       temp_node = node;
     }
   
-    if ((node = (INI_NODE *)temp_node->next_node = (struct INI_NODE *)malloc(sizeof(INI_NODE))) == NULL)
+	temp_node->next_node = (struct INI_NODE *)malloc(sizeof(INI_NODE));
+    if ((node = (INI_NODE *)temp_node->next_node ) == NULL)
       return(1);
 
     node->prev_node = (struct INI_NODE *)temp_node;
@@ -464,7 +476,8 @@ int ini_put_entry(INI_NODE *ARG_start, const char *ARG_section_comment, const ch
     temp_node = node;
 
     if (ARG_entry_comment != NULL) {
-      if ((node = (INI_NODE *)temp_node->next_node = (struct INI_NODE *)malloc(sizeof(INI_NODE))) == NULL)
+	  temp_node->next_node = (struct INI_NODE *)malloc(sizeof(INI_NODE));
+      if ((node = (INI_NODE *)temp_node->next_node ) == NULL)
         return(1);
 
       node->prev_node = (struct INI_NODE *)temp_node;
@@ -475,8 +488,9 @@ int ini_put_entry(INI_NODE *ARG_start, const char *ARG_section_comment, const ch
       strcat(strcpy(node->comment, ARG_entry_comment), "\n");
       temp_node = node;
     }
-
-    if ((node = (INI_NODE *)temp_node->next_node = (struct INI_NODE *)malloc(sizeof(INI_NODE))) == NULL)
+	
+	temp_node->next_node = (struct INI_NODE *)malloc(sizeof(INI_NODE));
+    if ((node = (INI_NODE *)temp_node->next_node ) == NULL)
       return(1);
 
     node->prev_node = (struct INI_NODE *)temp_node;
@@ -497,8 +511,11 @@ int ini_put_entry(INI_NODE *ARG_start, const char *ARG_section_comment, const ch
       temp_prev_node = temp_node;
       temp_node = node;
       if (node->node_id == 3) {
-        char temp_profile[strlen(temp_node->profile)];
+        char *temp_profile;
 
+        if (temp_profile == NULL) /* alloc failure */
+		  return(1);
+		temp_profile = calloc(strlen(temp_node->profile)+1, sizeof(char));
         strcpy(temp_profile, temp_node->profile);
         while (temp_node->profile[0] == ' ' || temp_node->profile[0] == '\t')
           temp_node->profile++;
@@ -507,6 +524,7 @@ int ini_put_entry(INI_NODE *ARG_start, const char *ARG_section_comment, const ch
         if (stricmp(temp_node->profile, ARG_profile) == 0)
           found = 1;
         strcpy(temp_node->profile, temp_profile);
+		free(temp_profile);
       }
     } while ((node = (INI_NODE *)node->next_node) != NULL && temp_node->node_id != 2 && found == 0);
 
@@ -529,7 +547,8 @@ int ini_put_entry(INI_NODE *ARG_start, const char *ARG_section_comment, const ch
         }
       }
       if (ARG_entry_comment != NULL) {
-        if ((node = (INI_NODE *)temp_prev_node->next_node = (struct INI_NODE *)malloc(sizeof(INI_NODE))) == NULL)
+		temp_prev_node->next_node = (struct INI_NODE *)malloc(sizeof(INI_NODE));
+        if ((node = (INI_NODE *)temp_prev_node->next_node ) == NULL)
           return(1);
 
         node->prev_node = (struct INI_NODE *)temp_prev_node;
@@ -541,7 +560,8 @@ int ini_put_entry(INI_NODE *ARG_start, const char *ARG_section_comment, const ch
         temp_prev_node = node;
       }
   
-      if ((node = (INI_NODE *)temp_prev_node->next_node = (struct INI_NODE *)malloc(sizeof(INI_NODE))) == NULL)
+	  temp_prev_node->next_node = (struct INI_NODE *)malloc(sizeof(INI_NODE));
+      if ((node = (INI_NODE *)temp_prev_node->next_node ) == NULL)
         return(1);
 
       node->prev_node = (struct INI_NODE *)temp_prev_node;
