@@ -39,7 +39,7 @@ int ini_new(INI_NODE **ARG_start)
   return(0);
 }        /* ini_new */
 
-int ini_load(INI_NODE **ARG_start, const char *ARG_file)
+int ini_load(INI_NODE **ARG_start, char *ARG_file)
 /*************************************************************************
  * Loads INI 'ARG_file' into memory starting @ 'ARG_start'               *
  *                                                                       *
@@ -125,7 +125,7 @@ int ini_load(INI_NODE **ARG_start, const char *ARG_file)
   return(0);
 }        /* ini_load */
 
-int ini_flush(INI_NODE *ARG_start, const char *ARG_file)
+int ini_flush(INI_NODE *ARG_start, char *ARG_file)
 /*************************************************************************
  * Writes INI 'ARG_file' from memory starting @ 'ARG_start'              *
  *                                                                       *
@@ -196,7 +196,7 @@ void ini_free(INI_NODE *ARG_start)
   } while (node != NULL);
 }        /* ini_free */
 
-int ini_get_string(INI_NODE *ARG_start, const char *ARG_section, const char *ARG_profile, char *ARG_value)
+int ini_get_string(INI_NODE *ARG_start, char *ARG_section, char *ARG_profile, char *ARG_value)
 /*************************************************************************
  * Gets string from INI file  starting @ 'ARG_start', from 'ARG_section' *
  * and 'ARG_profile' to 'ARG_value'                                      *
@@ -276,7 +276,7 @@ int ini_get_string(INI_NODE *ARG_start, const char *ARG_section, const char *ARG
   return(0);
 }        /* ini_get_string */
 
-int ini_get_int(INI_NODE *ARG_start, const char *ARG_section, const char *ARG_profile, int *ARG_value)
+int ini_get_int(INI_NODE *ARG_start, char *ARG_section, char *ARG_profile, int *ARG_value)
 /*************************************************************************
  * Gets integer from INI file starting @ 'ARG_start', from 'ARG_section' *
  * and 'ARG_profile'  to 'ARG_value', if it isn't integer it stores 0 to *
@@ -303,7 +303,7 @@ int ini_get_int(INI_NODE *ARG_start, const char *ARG_section, const char *ARG_pr
   return(ini_result);
 }        /* ini_get_int */
 
-int ini_get_long(INI_NODE *ARG_start, const char *ARG_section, const char *ARG_profile, long *ARG_value)
+int ini_get_long(INI_NODE *ARG_start, char *ARG_section, char *ARG_profile, long *ARG_value)
 /*************************************************************************
  * Gets long  from INI file  starting @ 'ARG_start', from  'ARG_section' *
  * and 'ARG_profile'  to 'ARG_value', if  it  isn't long it stores 0  to *
@@ -330,7 +330,7 @@ int ini_get_long(INI_NODE *ARG_start, const char *ARG_section, const char *ARG_p
   return(ini_result);
 }        /* ini_get_long */
 
-int ini_get_double(INI_NODE *ARG_start, const char *ARG_section, const char *ARG_profile, double *ARG_value)
+int ini_get_double(INI_NODE *ARG_start, char *ARG_section, char *ARG_profile, double *ARG_value)
 /*************************************************************************
  * Gets double from INI file  starting @ 'ARG_start', from 'ARG_section' *
  * and 'ARG_profile'  to 'ARG_value', if it isn't double  it stores 0 to *
@@ -357,7 +357,7 @@ int ini_get_double(INI_NODE *ARG_start, const char *ARG_section, const char *ARG
   return(ini_result);
 }        /* ini_get_double */
 
-int ini_get_truth(INI_NODE *ARG_start, const char *ARG_section, const char *ARG_profile, int *ARG_value)
+int ini_get_truth(INI_NODE *ARG_start, char *ARG_section, char *ARG_profile, int *ARG_value)
 /*************************************************************************
  * Gets 0 or 1 from INI file  starting @ 'ARG_start', from 'ARG_section' *
  * and 'ARG_profile' to 'ARG_value'                                      *
@@ -388,7 +388,7 @@ int ini_get_truth(INI_NODE *ARG_start, const char *ARG_section, const char *ARG_
   return(ini_result);
 }        /* ini_get_truth */
 
-int ini_put_entry(INI_NODE *ARG_start, const char *ARG_section_comment, const char *ARG_section, const char *ARG_entry_comment, const char *ARG_profile, const char *ARG_value, ...)
+int ini_put_entry(INI_NODE *ARG_start, char *ARG_section_comment, char *ARG_section, char *ARG_entry_comment, char *ARG_profile, char *ARG_value, ...)
 /*************************************************************************
  * Puts  'ARG_value'   from  'ARG_profile'  +   'ARG_entry_comment'   of *
  * 'ARG_section' + 'ARG_section_comment'  to  INI starting @ 'ARG_start' *
